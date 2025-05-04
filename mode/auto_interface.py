@@ -17,7 +17,6 @@ class AutoPage(QWidget, Ui_AUTO):
         # 自定义分区按钮
         self.CheckBox_Custom.toggled.connect(lambda: self.TextEdit_Custom.setVisible(self.CheckBox_Custom.isChecked()))
 
-
     def onCheckedChanged(self):
         status = self.CheckBox_Cfg.isChecked()
         disable_list = [
@@ -40,18 +39,30 @@ class AutoPage(QWidget, Ui_AUTO):
         ]
         for disable in disable_list:
             disable.setDisabled(status)
-
-    def init_dict(self):
-        self.res_dict['IMPORT'] = self.CheckBox_Cfg.isChecked()
-        self.res_dict['IMPORT_PATH'] = self.LineEdit_Import.text()
-        self.res_dict['ENCRYPTY'] = self.CheckBox_Encrypty.isChecked()
-        self.res_dict['LVM'] = self.CheckBox_Lvm.isChecked()
-        self.res_dict['ENCRYPTY_PWD'] = self.LineEdit_EncryptyPWD.text()
-
+                
     def selectFile(self):
         file_path, _ = QFileDialog.getOpenFileName(self, '选择文件', '', '文本文件 (*.iso);;所有文件 (*)')
         if file_path:
             self.LineEdit_Import.setText(file_path)
 
     def get_dict(self):
-        return {}
+        self.res_dict['IMPORT'] = self.CheckBox_Cfg.isChecked()
+        self.res_dict['IMPORT_PATH'] = self.LineEdit_Import.text()
+        self.res_dict['ENCRYPTY'] = self.CheckBox_Encrypty.isChecked()
+        self.res_dict['LVM'] = self.CheckBox_Lvm.isChecked()
+        self.res_dict['ENCRYPTY_PWD'] = self.LineEdit_EncryptyPWD.text()
+        self.res_dict['HOSTNAME'] = self.LineEdit_HostName.text()
+        self.res_dict['TIMEZONE'] = self.LineEdit_Timezone.text()
+        self.res_dict['DEV_PATH'] = self.LineEdit_Devpath.text()
+        self.res_dict['USERNAME'] = self.LineEdit_UserName.text()
+        self.res_dict['USERPWD'] = self.LineEdit_UserPWD.text()
+        self.res_dict['REBOOT'] = self.CheckBox_Reboot.isChecked()
+        self.res_dict['BACKUP'] = self.CheckBox_Backup.isChecked()
+        self.res_dict['SWAPFILE'] = self.CheckBox_swapfile.isChecked()
+        self.res_dict['OOBE'] = self.CheckBox_Oobe.isChecked()
+        self.res_dict['UNFORMAT'] = self.CheckBox_unformat.isChecked()
+        self.res_dict['AUTOLOGIN'] = self.CheckBox_Autologin.isChecked()
+        self.res_dict['AUTOMATIC'] = self.CheckBox_Automatic.isChecked()
+        self.res_dict['CUSTOM'] = self.CheckBox_Custom.isChecked()
+        self.res_dict['CUSTOM_PARTITION'] = self.TextEdit_Custom.toPlainText()
+        return self.res_dict

@@ -8,34 +8,21 @@ from UI.Ui_SERVICE import Ui_SERVICE
 
 class ServicePage(QWidget, Ui_SERVICE):
     """ test interface """
-
+    res_dict = {}
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setupUi(self)
-        self.res_dict = {}
-        self.init_dict()
-
         # 在线安装时不显示组件路径
         self.LineEdit_ComponentsPath.setVisible(False)
         self.PrimaryToolButton_ComponentsPath.setVisible(False)
         self.SwitchButton_Components.checkedChanged.connect(self.onCheckedChanged)
-        
         # 设置按钮图标
         self.PrimaryToolButton_CheckISO.setIcon(FIF.FOLDER)
         self.PrimaryToolButton_ComponentsPath.setIcon(FIF.FOLDER)
-
         # 获取ISO文件路径
         self.PrimaryToolButton_CheckISO.clicked.connect(self.selectFile)
-
         # 获取组件路径
         self.PrimaryToolButton_ComponentsPath.clicked.connect(self.selectFolder)
-
-    def init_dict(self):
-        self.res_dict['ISO_PATH'] = ''
-        self.res_dict['MODE'] = self.get_selected_radio_text(self.RadioButton_ISOMode, self.RadioButton_FileMode)
-        self.res_dict['ARCH'] = self.get_selected_radio_text(self.RadioButton_ARM, self.RadioButton_X86)
-        self.res_dict['ONLINE_INSTALL'] = self.SwitchButton_Components.isChecked()
-
 
     def get_selected_radio_text(self, *raodo):
         """

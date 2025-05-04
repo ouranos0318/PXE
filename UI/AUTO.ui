@@ -51,7 +51,7 @@
        <property name="minimumSize">
         <size>
          <width>29</width>
-         <height>33</height>
+         <height>22</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -203,7 +203,7 @@
           <property name="minimumSize">
            <size>
             <width>29</width>
-            <height>33</height>
+            <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -228,7 +228,7 @@
           <property name="minimumSize">
            <size>
             <width>29</width>
-            <height>33</height>
+            <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -620,7 +620,7 @@
           <property name="minimumSize">
            <size>
             <width>29</width>
-            <height>33</height>
+            <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -631,6 +631,9 @@
           </property>
           <property name="text">
            <string>安装后重启</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -652,7 +655,7 @@
           <property name="minimumSize">
            <size>
             <width>29</width>
-            <height>33</height>
+            <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -684,7 +687,7 @@
           <property name="minimumSize">
            <size>
             <width>29</width>
-            <height>33</height>
+            <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -716,7 +719,7 @@
           <property name="minimumSize">
            <size>
             <width>29</width>
-            <height>33</height>
+            <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -748,7 +751,7 @@
           <property name="minimumSize">
            <size>
             <width>29</width>
-            <height>33</height>
+            <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -841,6 +844,9 @@
       </property>
       <property name="text">
        <string>自动安装</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="TextEdit" name="TextEdit_Custom">

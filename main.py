@@ -13,19 +13,26 @@ from mode.service_interface import ServicePage
 from mode.dhcp_interface import DHCPPage
 from mode.auto_interface import AutoPage
 from mode.deploy_interface import DeployPage
-import logging
+from mode.install_pxe import Installer
+import time
+from PyQt5.QtGui import QColor
 
+class AppLoger():
+    def __init__(self, appendPlainText) -> None:
+        self.appendPlainText = appendPlainText
 
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+    def info(self, text, color=None):
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        self.appendPlainText(f"[INFO] [{current_time}] {text}", QColor(color))
+    
+    def error(self, text, color='red'):
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        self.appendPlainText(f"[ERROR] [{current_time}] {text}", QColor(color))
+
+    def warn(self, text, color='blue'):
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        self.appendPlainText(f"[WARN] [{current_time}] {text}", QColor(color))
+
 
 
 class Widget(QWidget):
@@ -144,7 +151,7 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.setMinimumSize(900, 760)  # 最小宽度 600，最小高度 400
         self.setMaximumSize(900, 760)  # 最大宽度 1600，最大高度 1200
         # 把日志写入到DeployInterface界面的PlainTextEdit控件中
-        self.addlog = self.DeployInterface.add_content_to_textedit
+        self.app_logger = AppLoger(self.DeployInterface.add_content_to_textedit)
 
     def initLayout(self):
         self.hBoxLayout.setSpacing(0)
@@ -211,7 +218,11 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.conf_dict.update(self.DHCPInterface.get_dict())
         self.conf_dict.update(self.AutoInterface.get_dict())
         self.conf_dict.update(self.DeployInterface.get_dict())
-        self.addlog(f"conf_dict: {self.conf_dict}")
+        # self.addlog('-' * 20)
+        # self.addlog(f"conf_dict: {self.conf_dict}")
+        begin = Installer(self.app_logger)
+        begin.check(self.conf_dict)
+
 
     # def showMessageBox(self):
     #     w = MessageBox(
@@ -237,12 +248,3 @@ if __name__ == '__main__':
 
     w.show()
     app.exec_()
-
-
-
-
-
-
-
-
-
