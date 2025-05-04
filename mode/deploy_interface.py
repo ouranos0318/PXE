@@ -43,7 +43,8 @@ class DeployPage(QWidget, Ui_DEPLOY):
                 result = subprocess.run(['systemctl', 'is-active', service], capture_output=True, text=True)
                 is_running = result.stdout.strip() == 'active'
             except Exception as e:
-                self.add_content_to_textedit(f"检查服务 {service} 状态时出错: {e}", QColor('red'))
+                # TODO 打开日志
+                # self.add_content_to_textedit(f"检查服务 {service} 状态时出错: {e}", QColor('red'))
                 is_running = False
             if service == 'dhcpd':
                 self.PrimaryToolButton_DHCP.setDisabled(not is_running)

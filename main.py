@@ -32,6 +32,9 @@ class AppLoger():
     def warn(self, text, color='blue'):
         current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         self.appendPlainText(f"[WARN] [{current_time}] {text}", QColor(color))
+        
+    def tip(self, text, color='green'):
+        self.appendPlainText(f"{text}", QColor(color))
 
 
 
@@ -213,6 +216,7 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
 
     
     def onDeployButtonClicked(self):
+        self.DeployInterface.PlainTextEdit.clear()
         self.conf_dict = {}
         self.conf_dict.update(self.ServiceInterface.get_dict())
         self.conf_dict.update(self.DHCPInterface.get_dict())
@@ -220,8 +224,8 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.conf_dict.update(self.DeployInterface.get_dict())
         # self.addlog('-' * 20)
         # self.addlog(f"conf_dict: {self.conf_dict}")
-        begin = Installer(self.app_logger)
-        begin.check(self.conf_dict)
+        begin = Installer(self.app_logger, self.conf_dict)
+        begin.check()
 
 
     # def showMessageBox(self):

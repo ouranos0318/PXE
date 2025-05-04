@@ -26,7 +26,6 @@ class DHCPPage(QWidget, Ui_DHCP):
         self.res_dict['END_IP'] = self.LineEdit_EndSubNet.text()
         self.res_dict['NET_INTER_NAME'] = self.ComboBox_NetName.currentText()
         self.res_dict['NET_INTER_IP'] = self.get_ip_by_interface(self.res_dict['NET_INTER_NAME'])
-        print(self.res_dict)
         return self.res_dict
 
     def get_net_interface(self):
