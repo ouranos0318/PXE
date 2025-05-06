@@ -54,3 +54,4 @@ class Installer():
         self.log.info(f"{Modifier}检查AUTO页配置项{Modifier}")
 
         
+        
