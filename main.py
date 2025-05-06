@@ -224,9 +224,9 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.conf_dict.update(self.DeployInterface.get_dict())
         # self.addlog('-' * 20)
         # self.addlog(f"conf_dict: {self.conf_dict}")
-        begin = Installer(self.app_logger, self.conf_dict)
-        begin.check()
-
+        # begin = Installer(self.app_logger, self.conf_dict)
+        # begin.check()
+        print(self.conf_dict)
 
     # def showMessageBox(self):
     #     w = MessageBox(

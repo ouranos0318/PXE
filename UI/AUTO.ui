@@ -374,7 +374,48 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <widget class="BodyLabel" name="BodyLabel_3">
+         <widget class="BodyLabel" name="BodyLabel_5">
+          <property name="minimumSize">
+           <size>
+            <width>70</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>用户名：</string>
+          </property>
+          <property name="buddy">
+           <cstring>LineEdit_UserName</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="LineEdit" name="LineEdit_UserName">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>kylin</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="BodyLabel" name="BodyLabel_6">
           <property name="minimumSize">
            <size>
             <width>60</width>
@@ -383,119 +424,34 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>16777215</width>
+            <width>60</width>
             <height>33</height>
            </size>
           </property>
           <property name="text">
-           <string>主机名：</string>
+           <string>密码：</string>
           </property>
           <property name="buddy">
-           <cstring>LineEdit_HostName</cstring>
+           <cstring>LineEdit_UserPWD</cstring>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="LineEdit" name="LineEdit_HostName">
+         <widget class="LineEdit" name="LineEdit_UserPWD">
           <property name="minimumSize">
            <size>
-            <width>170</width>
+            <width>200</width>
             <height>33</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>170</width>
+            <width>200</width>
             <height>33</height>
            </size>
           </property>
           <property name="text">
-           <string>kylin-pc</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="BodyLabel" name="BodyLabel_4">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>时区：</string>
-          </property>
-          <property name="buddy">
-           <cstring>LineEdit_Timezone</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="LineEdit" name="LineEdit_Timezone">
-          <property name="minimumSize">
-           <size>
-            <width>170</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>170</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Asia/Shanghai</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="BodyLabel" name="BodyLabel_7">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>100</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>全盘安装路径：</string>
-          </property>
-          <property name="buddy">
-           <cstring>LineEdit_Devpath</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="LineEdit" name="LineEdit_Devpath">
-          <property name="minimumSize">
-           <size>
-            <width>170</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>170</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="placeholderText">
-           <string>默认自动选择</string>
+           <string>qwer1234</string>
           </property>
          </widget>
         </item>
@@ -517,84 +473,84 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="BodyLabel" name="BodyLabel_5">
+         <widget class="BodyLabel" name="BodyLabel_7">
+          <property name="minimumSize">
+           <size>
+            <width>70</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>全盘安装：</string>
+          </property>
+          <property name="buddy">
+           <cstring>LineEdit_Devpath</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="LineEdit" name="LineEdit_Devpath">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>33</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>空(推荐) | /dev/sdx</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="BodyLabel" name="BodyLabel">
           <property name="minimumSize">
            <size>
             <width>60</width>
-            <height>33</height>
+            <height>0</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>150</width>
-            <height>33</height>
+            <width>60</width>
+            <height>16777215</height>
            </size>
           </property>
           <property name="text">
-           <string>用户名：</string>
-          </property>
-          <property name="buddy">
-           <cstring>LineEdit_UserName</cstring>
+           <string>数据盘：</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="LineEdit" name="LineEdit_UserName">
+         <widget class="LineEdit" name="LineEdit_DateDevicePath">
           <property name="minimumSize">
            <size>
-            <width>170</width>
-            <height>22</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>170</width>
-            <height>22</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>kylin</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="BodyLabel" name="BodyLabel_6">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
+            <width>200</width>
             <height>33</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>16777215</width>
+            <width>200</width>
             <height>33</height>
            </size>
           </property>
-          <property name="text">
-           <string>密码：</string>
-          </property>
-          <property name="buddy">
-           <cstring>LineEdit_UserPWD</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="LineEdit" name="LineEdit_UserPWD">
-          <property name="minimumSize">
-           <size>
-            <width>170</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>170</width>
-            <height>33</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>qwer1234</string>
+          <property name="placeholderText">
+           <string>空(推荐) | auto | /dev/sdx</string>
           </property>
          </widget>
         </item>
