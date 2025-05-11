@@ -197,7 +197,7 @@ class Installer:
             # 设置installer.cfg文件
             # [Encrypty]
             self.config.set('Encrypty','encrypty',str(self.res_dict['ENCRYPTY']).lower())
-            self.config['Encrypty']['encrypty_pwd'] = f"@ByteArray{self.res_dict['ENCRYPTY_PWD']}"
+            self.config['Encrypty']['encryptypwd'] = f"@ByteArray({self.res_dict['ENCRYPTY_PWD']})"
             self.config['Encrypty']['lvm'] = str(self.res_dict['LVM']).lower()
 
             # [config]
@@ -205,9 +205,9 @@ class Installer:
             self.config['config']['automatic-installation'] = '1' if self.res_dict['AUTOMATIC'] else '0'
             self.config['config']['devpath'] = self.res_dict['DEV_PATH']
             self.config['config']['enable-swapfile'] = str(self.res_dict['SWAPFILE']).lower()
-            self.config['config']['factory-backup'] = str(self.res_dict['BACKUP']).lower()
+            self.config['config']['factory-backup'] = '1' if self.res_dict['BACKUP'] else '0'
             self.config['config']['username'] = self.res_dict['USERNAME']
-            self.config['config']['password'] = f"@ByteArray{self.res_dict['USERPWD']}"
+            self.config['config']['password'] = f"@ByteArray({self.res_dict['USERPWD']})"
             self.config['config']['reboot'] = '1' if self.res_dict['REBOOT'] else '0'
             self.config['config']['username'] = str(self.res_dict['USERNAME']).lower()
             self.config['config']['data-device'] = self.res_dict['DATA_DEVICE_PATH']
@@ -215,16 +215,16 @@ class Installer:
             self.config['config']['data-unformat'] = str(self.res_dict['UNFORMAT']).lower()
 
             # [custom-partitions]
-            self.config['custompartition']['disk-custom'] = str(self.res_dict['CUSTOM']).lower()
-            self.config['custompartition']['custom-partitions'] = self.res_dict['CUSTOM_PARTITION']['custom-partitions']
-            self.config['custompartition']['disk-efi'] = str(self.res_dict['CUSTOM_PARTITION']['custom-efi'])
-            self.config['custompartition']['disk-boot'] = self.res_dict['CUSTOM_PARTITION']['custom-boot']
-            self.config['custompartition']['disk-root'] = self.res_dict['CUSTOM_PARTITION']['custom-root']
-            self.config['custompartition']['disk-backup'] = self.res_dict['CUSTOM_PARTITION']['custom-backup']
-            self.config['custompartition']['disk-data'] = self.res_dict['CUSTOM_PARTITION']['custom-data']
-            self.config['custompartition']['disk-swap'] = self.res_dict['CUSTOM_PARTITION']['custom-swap']
+            self.config['custompartition']['disk-custom'] =  str(self.res_dict['CUSTOM']).lower()
+            self.config['custompartition']['custom-partitions'] =  f'"{self.res_dict['CUSTOM_PARTITION']['custom-partitions']}"'
+            self.config['custompartition']['custom-efi'] =  f'"{str(self.res_dict['CUSTOM_PARTITION']['custom-efi'])}"'
+            self.config['custompartition']['custom-boot'] = f'"{self.res_dict['CUSTOM_PARTITION']['custom-boot']}"'
+            self.config['custompartition']['custom-root'] =  f'"{self.res_dict['CUSTOM_PARTITION']['custom-root']}"'
+            self.config['custompartition']['custom-backup'] =  f'"{self.res_dict['CUSTOM_PARTITION']['custom-backup']}"'
+            self.config['custompartition']['custom-data'] =  f'"{self.res_dict['CUSTOM_PARTITION']['custom-data']}"'
+            self.config['custompartition']['custom-swap'] =  f'"{self.res_dict['CUSTOM_PARTITION']['custom-swap']}"'
         # 写入ky-installer.cfg
-        installer_path = os.path.join(self.iso_dir, 'ky-installer.cfg')
+        installer_path = os.path.join('/opt/nfs/',self.iso_dir, 'ky-installer.cfg')
         with open(installer_path, 'w', encoding='utf-8') as file:
             self.config.write(file)  # type: ignore
             self.log.info('写入配置文件成功')
@@ -265,18 +265,18 @@ class Installer:
             self.log.error(f'TFTP配置失败,错误信息：{e}')
 
     def deploy(self):
-        print('开始deploy')
-        self.check()
-        if self.mode == '文件模式':
-            self.install_packages()
-            self.deploy_dhcp()
-            self.deploy_nfs()
-            self.mount_iso()
-            self.copy_iso()
-            self.config_installer()
-            self.deploy_tftp()
-        else:
-            print(f'self.mode:{self.mode}')
+        if self.check():
+            self.log.info('开始部署')
+            if self.mode == '文件模式':
+                self.install_packages()
+                self.deploy_dhcp()
+                self.deploy_nfs()
+                self.mount_iso()
+                self.copy_iso()
+                self.config_installer()
+                self.deploy_tftp()
+            else:
+                print(f'self.mode:{self.mode}')
 
         
         
