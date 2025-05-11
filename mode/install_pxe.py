@@ -2,7 +2,6 @@ import os
 from configparser import ConfigParser
 import subprocess
 
-
 def shellcmd(cmd) -> subprocess.CompletedProcess:
     return subprocess.run(
         cmd,
@@ -12,32 +11,31 @@ def shellcmd(cmd) -> subprocess.CompletedProcess:
         stderr=subprocess.PIPE
     )
 
-class Installer():    
-    def __init__(self, logobject, res_dict):
-        self.log = logobject
+# 检查ip是否在同一网段
+def ipCheck(ip1, ip2):
+    ip1_parts = ip1.split('.')
+    ip2_parts = ip2.split('.')
+    if len(ip1_parts) != 4 or len(ip2_parts) != 4:
+        return False
+    # 比较前三个网段
+    for i in range(3):
+        if ip1_parts[i] != ip2_parts[i]:
+            return False
+    return True
+
+class Installer:
+    def __init__(self, object, res_dict):
+        self.log = object
         self.res_dict = res_dict
         self.config = ConfigParser()
         self.packages ='isc-dhcp-server nfs-kernel-server tftpd-hpa'
         self.mode = self.res_dict['MODE']
         self.iso_dir = ''
-    
-    # 检查ip是否在同一网段
-    def ipCheck(self, ip1, ip2):
-        ip1_parts = ip1.split('.')
-        ip2_parts = ip2.split('.')
-        if len(ip1_parts) != 4 or len(ip2_parts) != 4:
-            return False
-        # 比较前三个网段
-        for i in range(3):
-            if ip1_parts[i] != ip2_parts[i]:
-                return False      
-        return True
-
 
     def check(self):
-        Modifier = '*' * 10
+        modifier = '*' * 10
         # 检查service_interface配置项
-        self.log.tip(f"{Modifier}检查基础页配置项{Modifier}")
+        self.log.tip(f"{modifier}检查基础页配置项{modifier}")
         if not self.res_dict['ISO_PATH']:
             self.log.error("ISO路径不能为空,进程停止")
             return False
@@ -47,14 +45,14 @@ class Installer():
                 return False
 
         # 检查deploy_interface配置项
-        self.log.tip(f"{Modifier}检查DHCP页配置项{Modifier}")
+        self.log.tip(f"{modifier}检查DHCP页配置项{modifier}")
 
         if self.res_dict['NET_INTER_IP'] and not self.res_dict['NET_INTER_IP'].startswith('169.254.'):
-            if not self.ipCheck(self.res_dict['NET_INTER_IP'], self.res_dict['START_IP']):
+            if not ipCheck(self.res_dict['NET_INTER_IP'], self.res_dict['START_IP']):
                 print(self.res_dict['NET_INTER_IP'], self.res_dict['START_IP'])
                 self.log.error("网络接口IP与起始IP不在同一网段,进程停止")
                 return False
-            if not self.ipCheck(self.res_dict['NET_INTER_IP'], self.res_dict['END_IP']):
+            if not ipCheck(self.res_dict['NET_INTER_IP'], self.res_dict['END_IP']):
                 self.log.error("网络接口IP与结束IP不在同一网段,进程停止")
                 return False
             if self.res_dict['START_IP'] > self.res_dict['END_IP']:
@@ -65,7 +63,7 @@ class Installer():
             return False
 
         # 检查auto_interface配置项
-        self.log.tip(f"{Modifier}检查AUTO页配置项{Modifier}")
+        self.log.tip(f"{modifier}检查AUTO页配置项{modifier}")
 
         # 检查自定义全盘安装时 加密和LVM功能是否关闭
         if self.res_dict['CUSTOM'] and  ( self.res_dict['ENCRYPTY'] or self.res_dict['LVM'] or self.res_dict['UNFORMAT'] ):
@@ -111,10 +109,10 @@ class Installer():
             with open('/etc/default/isc-dhcp-server', 'w') as f:
                 for line in lines:
                     if line.startswith('INTERFACESv4='):
-                        f.write(f"INTERFACESv4=\"{self.res_dict['NET_INTER_NAME']}\"\n")
+                        f.write(f"INTERFACESv4=\"{interface_name}\"\n")
                     else:
                         f.write(line)
-            self.log.info(f"网卡绑定配置成功，INTERFACESv4=\"{self.res_dict['NET_INTER_NAME']}\"")
+            self.log.info(f"网卡绑定配置成功，INTERFACESv4=\"{interface_name}\"")
         except Exception as e:
             self.log.error(f'配置网卡绑定失败，错误信息：{e}')
             return False
@@ -131,7 +129,7 @@ class Installer():
                 "allow bootp;\n"
                 f"subnet {network_segment}.0 netmask 255.255.255.0 {{\n"
                 f"    range {self.res_dict['START_IP']} {self.res_dict['END_IP']};\n"
-                "    option subnet-mask 255.255.255.0;\n"
+                f"    option subnet-mask 255.255.255.0;\n"
                 f"    option routers {network_segment}.1;\n"
                 f"    next-server {self.res_dict['NET_INTER_IP']};\n"
                 f'    filename "{net_boot}";\n'
@@ -270,21 +268,13 @@ class Installer():
         print('开始deploy')
         self.check()
         if self.mode == '文件模式':
-            # print('install_packages')
-            # self.install_packages()
-            # print('deploy_dhcp')
+            self.install_packages()
             self.deploy_dhcp()
-            # print('deploy_nfs')
-            # self.deploy_nfs()
-            # print('mount_iso')
-            # self.mount_iso()
-            # print('copy_iso')
-            # self.copy_iso()
-            # print('config_installer')
-            # self.config_installer()
-            # print('deploy_tftp')
-            # self.deploy_tftp()
-
+            self.deploy_nfs()
+            self.mount_iso()
+            self.copy_iso()
+            self.config_installer()
+            self.deploy_tftp()
         else:
             print(f'self.mode:{self.mode}')
 
