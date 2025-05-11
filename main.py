@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QApplication, QFrame, QWidget
 from qfluentwidgets import (NavigationBar, NavigationItemPosition, isDarkTheme, PopUpAniStackedWidget,  setThemeColor)
 from qfluentwidgets import FluentIcon as FIF
-from qframelesswindow import FramelessWindow, TitleBar, AcrylicWindow
+from qframelesswindow import FramelessWindow, TitleBar
 
 from mode.service_interface import ServicePage
 from mode.dhcp_interface import DHCPPage
@@ -17,22 +17,24 @@ from mode.install_pxe import Installer
 import time
 from PyQt5.QtGui import QColor
 
-class AppLoger():
+
+
+class AppLoger:
     def __init__(self, appendPlainText) -> None:
         self.appendPlainText = appendPlainText
 
     def info(self, text, color=None):
         current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         self.appendPlainText(f"[INFO] [{current_time}] {text}", QColor(color))
-    
+
     def error(self, text, color='red'):
         current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        self.appendPlainText(f"[ERROR] [{current_time}] {text}", QColor(color))
+        self.appendPlainText(f"[ERROR] [{current_time}] {text}",QColor(color))
 
     def warn(self, text, color='blue'):
         current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         self.appendPlainText(f"[WARN] [{current_time}] {text}", QColor(color))
-        
+
     def tip(self, text, color='green'):
         self.appendPlainText(f"{text}", QColor(color))
 
@@ -183,8 +185,8 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.AutoInterface.PrimaryPushButton_ServiceNext.clicked.connect(lambda: self.switchTo(self.DeployInterface))
         self.titleBar.setAttribute(Qt.WA_StyledBackground)
         desktop = QApplication.desktop().availableGeometry()
-        w, h = desktop.width(), desktop.height()
-        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
+        _w, h = desktop.width(), desktop.height()
+        self.move(_w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         # 调用设置QSS样式表的方法
         self.setQss()
         # 部署按钮执行操作
@@ -222,11 +224,11 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.conf_dict.update(self.DHCPInterface.get_dict())
         self.conf_dict.update(self.AutoInterface.get_dict())
         self.conf_dict.update(self.DeployInterface.get_dict())
-        # self.addlog('-' * 20)
-        # self.addlog(f"conf_dict: {self.conf_dict}")
-        # begin = Installer(self.app_logger, self.conf_dict)
+
+        begin = Installer(self.app_logger, self.conf_dict)
         # begin.check()
         print(self.conf_dict)
+        begin.deploy()
 
     # def showMessageBox(self):
     #     w = MessageBox(

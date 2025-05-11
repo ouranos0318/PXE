@@ -536,7 +536,7 @@
          </widget>
         </item>
         <item>
-         <widget class="LineEdit" name="LineEdit_DateDevicePath">
+         <widget class="LineEdit" name="LineEdit_DataDevicePath">
           <property name="minimumSize">
            <size>
             <width>200</width>

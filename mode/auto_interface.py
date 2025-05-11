@@ -30,12 +30,11 @@ class AutoPage(QWidget, Ui_AUTO):
             self.CheckBox_unformat,     # 保留用户数据
             self.CheckBox_Backup,       # 出厂备份
             self.CheckBox_Automatic,    # 自动安装
-            self.LineEdit_HostName,     # 主机名
             self.LineEdit_Devpath,      # 全盘安装路径
             self.LineEdit_UserName,     # 用户名
             self.LineEdit_UserPWD,      # 密码
-            self.LineEdit_Timezone,     # 时区
             self.CheckBox_Custom,       # 自定义分区
+            self.LineEdit_DataDevicePath # 数据盘路径
         ]
         for disable in disable_list:
             disable.setDisabled(status)
@@ -45,14 +44,21 @@ class AutoPage(QWidget, Ui_AUTO):
         if file_path:
             self.LineEdit_Import.setText(file_path)
 
+    def parse_custom_config(self, config_str):
+        result = {}
+        for line in config_str.split('\n'):
+            if '=' in line:
+                key, value = line.split('=', 1)
+                value = value.strip('"')
+                result[key] = value
+        return result
+
     def get_dict(self):
         self.res_dict['IMPORT'] = self.CheckBox_Cfg.isChecked()
         self.res_dict['IMPORT_PATH'] = self.LineEdit_Import.text()
         self.res_dict['ENCRYPTY'] = self.CheckBox_Encrypty.isChecked()
         self.res_dict['LVM'] = self.CheckBox_Lvm.isChecked()
         self.res_dict['ENCRYPTY_PWD'] = self.LineEdit_EncryptyPWD.text()
-        self.res_dict['HOSTNAME'] = self.LineEdit_HostName.text()
-        self.res_dict['TIMEZONE'] = self.LineEdit_Timezone.text()
         self.res_dict['DEV_PATH'] = self.LineEdit_Devpath.text()
         self.res_dict['USERNAME'] = self.LineEdit_UserName.text()
         self.res_dict['USERPWD'] = self.LineEdit_UserPWD.text()
@@ -64,5 +70,6 @@ class AutoPage(QWidget, Ui_AUTO):
         self.res_dict['AUTOLOGIN'] = self.CheckBox_Autologin.isChecked()
         self.res_dict['AUTOMATIC'] = self.CheckBox_Automatic.isChecked()
         self.res_dict['CUSTOM'] = self.CheckBox_Custom.isChecked()
-        self.res_dict['CUSTOM_PARTITION'] = self.TextEdit_Custom.toPlainText()
+        self.res_dict['CUSTOM_PARTITION'] = self.parse_custom_config(self.TextEdit_Custom.toPlainText())
+        self.res_dict['DATA_DEVICE_PATH'] = self.LineEdit_DataDevicePath.text()
         return self.res_dict

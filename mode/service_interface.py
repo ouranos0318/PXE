@@ -58,6 +58,5 @@ class ServicePage(QWidget, Ui_SERVICE):
        self.res_dict['MODE'] = self.get_selected_radio_text(self.RadioButton_ISOMode, self.RadioButton_FileMode)
        self.res_dict['ARCH'] = self.get_selected_radio_text(self.RadioButton_ARM, self.RadioButton_X86)
        self.res_dict['ONLINE_INSTALL'] = self.SwitchButton_Components.isChecked()
-       print(self.res_dict)
        return self.res_dict
 
