@@ -197,7 +197,7 @@ class Installer:
             # 设置installer.cfg文件
             # [Encrypty]
             self.config.set('Encrypty','encrypty',str(self.res_dict['ENCRYPTY']).lower())
-            self.config['Encrypty']['encrypty_pwd'] = f'@ByteArray{self.res_dict['ENCRYPTY_PWD']}'
+            self.config['Encrypty']['encrypty_pwd'] = f"@ByteArray{self.res_dict['ENCRYPTY_PWD']}"
             self.config['Encrypty']['lvm'] = str(self.res_dict['LVM']).lower()
 
             # [config]
@@ -207,7 +207,7 @@ class Installer:
             self.config['config']['enable-swapfile'] = str(self.res_dict['SWAPFILE']).lower()
             self.config['config']['factory-backup'] = str(self.res_dict['BACKUP']).lower()
             self.config['config']['username'] = self.res_dict['USERNAME']
-            self.config['config']['password'] = f'@ByteArray{self.res_dict['USERPWD']}'
+            self.config['config']['password'] = f"@ByteArray{self.res_dict['USERPWD']}"
             self.config['config']['reboot'] = '1' if self.res_dict['REBOOT'] else '0'
             self.config['config']['username'] = str(self.res_dict['USERNAME']).lower()
             self.config['config']['data-device'] = self.res_dict['DATA_DEVICE_PATH']
@@ -255,8 +255,8 @@ class Installer:
             # 配置grub文件
             grub_file = (
                 f'menuentry "Install Kylin-Desktop-Auto" {{\n'
-                f'linux ${{root}}/casper/vmlinuz boot=casper locale=zh_CN quiet splash audit =0 ip=dhcp netboot=nfs nfsroot= {self.res_dict['NET_INTER_IP']}:/opt/nfs/{self.iso_dir}/ security= a utomatic-ubiquity'
-                f'initrd ${{root}}/casper/initrd.lz\n}}'
+                f"linux ${{root}}/casper/vmlinuz boot=casper locale=zh_CN quiet splash audit =0 ip=dhcp netboot=nfs nfsroot= {self.res_dict['NET_INTER_IP']}:/opt/nfs/{self.iso_dir}/ security= a utomatic-ubiquity"
+                f"initrd ${{root}}/casper/initrd.lz\n}}"
             )
             with open(f'/srv/tftp/{self.iso_dir}/boot/grub/grub.cfg', 'w') as f:
                 f.write(grub_file)

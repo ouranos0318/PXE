@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'e:\BaiduSyncdisk\开发文件\Preboot eXecution Environment\UI\DHCP.ui'
+# Form implementation generated from reading ui file 'DHCP.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
