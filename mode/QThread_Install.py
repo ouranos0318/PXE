@@ -333,7 +333,7 @@ class Installer(QThread):
                 self.copy_iso,
                 self.config_installer,
                 self.deploy_tftp,
-                restart_service
+                self.restart_service
             ]
 
             for method in methods_to_run:
