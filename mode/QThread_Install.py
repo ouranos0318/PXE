@@ -99,7 +99,6 @@ class Installer(QThread):
             try:
                 self.log.info(f"开始在线安装组件包")
                 install_packages = shellcmd(f'apt install -y {self.packages}')
-                self.log.tip(f'{install_packages.stdout}')
                 if install_packages.returncode:
                     self.log.error(f'在线安装组件包失败，错误信息：{install_packages.stderr}')
                     flag = False
@@ -304,6 +303,23 @@ class Installer(QThread):
             flag = False
         return flag
 
+    def restart_service(self):
+        flag = True
+        try:
+            # 重启服务
+            self.log.info('开始重启服务')
+            restart_dhcp = shellcmd('systemctl restart isc-dhcp-server')
+            restart_nfs = shellcmd('systemctl restart nfs-server')
+            restart_tftp = shellcmd('systemctl restart tftpd-hpa')
+            if restart_dhcp.returncode or restart_nfs.returncode or restart_tftp.returncode:
+                self.log.error(f'重启服务失败,错误信息：{restart_dhcp.stderr}')
+                flag = False
+            else:
+                self.log.info('重启服务成功')
+        except Exception as e:
+            self.log.error(f'重启服务失败,错误信息：{e}')
+            flag = False
+        return flag
     # 运行函数
     def run(self):
         try:
@@ -316,7 +332,8 @@ class Installer(QThread):
                 self.mount_iso,
                 self.copy_iso,
                 self.config_installer,
-                self.deploy_tftp
+                self.deploy_tftp,
+                restart_service
             ]
 
             for method in methods_to_run:
@@ -324,6 +341,7 @@ class Installer(QThread):
                 print(f'{method.__name__}{status}')
                 if not status:
                     return
+
             self.log.info('所有配置完成')
         except Exception as e:
             self.log.error(f'运行过程中出现异常,错误信息：{e}')
