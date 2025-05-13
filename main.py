@@ -13,7 +13,6 @@ from mode.service_interface import ServicePage
 from mode.dhcp_interface import DHCPPage
 from mode.auto_interface import AutoPage
 from mode.deploy_interface import DeployPage
-from mode.install_pxe import Installer
 from mode.QThread_Install import Installer
 import time
 from PyQt5.QtGui import QColor

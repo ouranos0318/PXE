@@ -45,14 +45,12 @@ class DeployPage(QWidget, Ui_DEPLOY):
             try:
                 result = subprocess.run(['systemctl', 'is-active', service], capture_output=True, text=True)
                 is_running = result.stdout.strip() == 'active'
-                # print(f"服务 {service} 状态: {'active' if is_running else 'inactive'}")  # 添加日志输出
             except Exception as e:
-                # self.add_content_to_textedit(f"检查服务 {service} 状态时出错: {e}", QColor('red'))
                 is_running = False
             button = button_mapping.get(service)
             if button:
                 button.setDisabled(not is_running)
-                # print(f"服务 {service} 对应按钮状态已更新为 {'启用' if not is_running else '禁用'}")  # 添加日志输出
+
 
 
 
