@@ -338,7 +338,7 @@ class Installer(QThread):
 
             for method in methods_to_run:
                 status = method()
-                print(f'{method.__name__}{status}')
+                print(f'{method.__name__} => {status}')
                 if not status:
                     return
 
