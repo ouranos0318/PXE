@@ -1,4 +1,4 @@
-import sys
+import sys, os, pwd
 sys.path.append(r'../UI')
 
 from PyQt5.QtWidgets import QWidget,QFileDialog
@@ -41,14 +41,37 @@ class ServicePage(QWidget, Ui_SERVICE):
         self.LineEdit_ComponentsPath.setVisible(status)
         self.PrimaryToolButton_ComponentsPath.setVisible(status)
 
+    def get_user_home(self):
+        """ 获取原始用户的家目录（处理 sudo 场景） """
+        try:
+            # sudo 运行时，SUDO_USER 保存原始用户名（如 chris）
+            username = os.environ.get('SUDO_USER', os.getlogin())
+            # 通过用户名获取家目录
+            return pwd.getpwnam(username).pw_dir
+        except Exception as e:
+            print(f"获取用户家目录失败: {e}")
+            return os.path.expanduser("~")  # 回退到当前用户家目录（可能是 root）
 
     def selectFile(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, '选择文件', '', '文本文件 (*.iso);;所有文件 (*)')
+        # 使用原始用户的家目录作为初始路径
+        home_dir = self.get_user_home()
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            '选择文件',
+            f'{home_dir}/桌面/',  # 初始路径改为原始用户家目录
+            'ISO 文件 (*.iso);;所有文件 (*)'  # 修正：明确筛选 ISO 文件
+        )
         if file_path:
             self.LineEdit_ISOPath.setText(file_path)
 
     def selectFolder(self):
-        folder_path = QFileDialog.getExistingDirectory(self, '选择文件夹')
+        # 使用原始用户的家目录作为初始路径
+        home_dir = self.get_user_home()
+        folder_path = QFileDialog.getExistingDirectory(
+            self,
+            '选择文件夹',
+            home_dir  # 初始路径改为原始用户家目录
+        )
         if folder_path:
             self.LineEdit_ComponentsPath.setText(folder_path)
 

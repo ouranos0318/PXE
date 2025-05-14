@@ -1,5 +1,5 @@
 # coding:utf-8
-import sys
+import sys, os
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 from PyQt5.QtCore import Qt, pyqtSignal, QEasingCurve
@@ -8,12 +8,12 @@ from PyQt5.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QApplication, QFra
 from qfluentwidgets import (NavigationBar, NavigationItemPosition, isDarkTheme, PopUpAniStackedWidget,  setThemeColor)
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import FramelessWindow, TitleBar
-
+from pathlib import Path
 from mode.service_interface import ServicePage
 from mode.dhcp_interface import DHCPPage
 from mode.auto_interface import AutoPage
 from mode.deploy_interface import DeployPage
-from mode.QThread_Install import Installer
+from mode.QThread_Install import Installer, Remove
 import time
 from PyQt5.QtGui import QColor
 
@@ -131,7 +131,8 @@ class CustomTitleBar(TitleBar):
 
 class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
     conf_dict = {}
-    def __init__(self):
+    def __init__(self,resource_root):
+        self.resource_root = resource_root
         super().__init__()
         self.setTitleBar(CustomTitleBar(self))
         #use dark theme mode
@@ -159,6 +160,7 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.app_logger = AppLoger(self.DeployInterface.add_content_to_textedit)
         # 定义多线程类
         self.installer = None
+        self.remove = None
 
 
 
@@ -195,6 +197,7 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.setQss()
         # 部署按钮执行操作
         self.DeployInterface.PrimaryPushButton.clicked.connect(self.onDeployButtonClicked)
+        self.DeployInterface.PrimaryPushButton_remove.clicked.connect(self.onDeployButtonRemoveClicked)
 
     def addSubInterface(self, interface, icon, text: str, position=NavigationItemPosition.TOP, selectedIcon=None):
         """ add sub interface """
@@ -210,7 +213,17 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
 
     def setQss(self):
         color = 'dark' if isDarkTheme() else 'light'
-        with open(f'resource/{color}/demo.qss', encoding='utf-8') as f:
+        # 获取 main.py 所在的绝对目录
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # 拼接资源文件的绝对路径（假设 resource 与 main.py 同级）
+        qss_path = os.path.join(script_dir, 'resource', color, 'demo.qss')
+
+        # 检查文件是否存在（可选，用于调试）
+        if not os.path.exists(qss_path):
+            self.app_logger.error(f"QSS 文件不存在，路径：{qss_path}")
+            return
+
+        with open(qss_path, encoding='utf-8') as f:
             self.setStyleSheet(f.read())
 
     def switchTo(self, widget):
@@ -243,6 +256,14 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
         self.installer.finished_signal.connect(self.Finished)
         self.installer.start()
 
+    def onDeployButtonRemoveClicked(self):
+        if self.remove and self.remove.isRunning():
+            self.remove.stop()
+        self.remove = Remove()
+        self.remove.output_signal.connect(self.UpdatePlainTextEdit)
+        self.remove.error_signal.connect(self.HandleError)
+        self.remove.finished_signal.connect(self.Finished)
+        self.remove.start()
 
     def UpdatePlainTextEdit(self, text:tuple):
         level, text = text
@@ -275,15 +296,45 @@ class Window(FramelessWindow): # 继承AcrylicWindow后有亚克力效果
     #     if w.exec():
     #         QDesktopServices.openUrl(QUrl("https://afdian.net/a/zhiyiYo"))
 
+def check_and_get_root():
+    if os.geteuid() != 0:
+        try:
+            import subprocess
+            script_path = os.path.abspath(sys.argv[0])
+            # 确定资源根路径（打包后为临时目录，开发环境为脚本目录）
+            resource_root = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(script_path)
+            print(f"当前资源根路径: {resource_root}")
+
+            # 关键修改：通过 Python 解释器执行脚本
+            command = [
+                'pkexec',
+                'env',
+                f"DISPLAY={os.environ['DISPLAY']}",
+                f"XAUTHORITY={os.environ['XAUTHORITY']}",
+                sys.executable,  # 使用当前 Python 解释器路径（如 /usr/bin/python3）
+                script_path,     # 要执行的脚本路径（main.py）
+                resource_root    # 传递资源根路径
+            ]
+            subprocess.call(command)
+            sys.exit(0)
+        except Exception as e:
+            print(f"获取 root 权限时出错: {e}")
+            sys.exit(1)
 
 if __name__ == '__main__':
+    check_and_get_root()
+    # 获取资源根路径（从命令行参数或默认路径）
+    if len(sys.argv) > 1:
+        resource_root = sys.argv[1]  # 打包后为 PyInstaller 临时目录
+    else:
+        # 开发环境下使用脚本所在目录
+        resource_root = str(Path(__file__).parent.resolve())
+
+
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
-
-
     app = QApplication(sys.argv)
-    w = Window()
-
+    w = Window(resource_root)  # 传递正确的资源根路径
     w.show()
-    app.exec_()
+    sys.exit(app.exec_())

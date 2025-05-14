@@ -1,9 +1,11 @@
-import os
+import os, sys, pwd
 import subprocess
 from configparser import ConfigParser
 from PyQt5.QtCore import QThread, pyqtSignal
 
 def shellcmd(cmd) -> subprocess.CompletedProcess:
+    # 新增：打印环境变量
+    print(f"[DEBUG] 当前环境变量 PATH: {os.environ.get('PATH', '')}")
     return subprocess.run(
         cmd,
         shell=True,
@@ -50,6 +52,15 @@ class Installer(QThread):
         self.packages ='isc-dhcp-server nfs-kernel-server tftpd-hpa'
         self.mode = self.res_dict['MODE']
         self.iso_dir = ''
+
+        # 修正：适配打包环境（使用 sys._MEIPASS 或开发环境路径）
+        if getattr(sys, 'frozen', False):  # 打包后
+            self.project_root = sys._MEIPASS
+        else:  # 开发环境
+            self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.default_cfg_path = os.path.join(self.project_root, 'default.cfg')
+
+
 
 
     def check_result_dict(self):
@@ -122,14 +133,21 @@ class Installer(QThread):
 
     def deploy_dhcp(self):
         flag = True
-        # 配置网卡绑定
+        # 新增：检查当前用户权限
+        print(f"[DEBUG] 当前用户UID: {os.geteuid()}（尝试配置DHCP）")
         try:
             self.log.info('开始配置网卡绑定')
             interface_name = self.res_dict['NET_INTER_NAME']
-            with open('/etc/default/isc-dhcp-server', 'r') as f:
+            # 新增：检查目标文件路径和权限
+            dhcp_server_conf = '/etc/default/isc-dhcp-server'
+            print(f"[DEBUG] 尝试修改文件: {dhcp_server_conf}")
+            if os.path.exists(dhcp_server_conf):
+                print(f"[DEBUG] 文件权限: {oct(os.stat(dhcp_server_conf).st_mode)}")  # 输出文件权限（如0o644）
+
+            with open(dhcp_server_conf, 'r') as f:
                 lines = f.readlines()
-            # 修改 INTERFACESv4 的值
-            with open('/etc/default/isc-dhcp-server', 'w') as f:
+
+            with open(dhcp_server_conf, 'w') as f:
                 for line in lines:
                     if line.startswith('INTERFACESv4='):
                         f.write(f"INTERFACESv4=\"{interface_name}\"\n")
@@ -137,12 +155,18 @@ class Installer(QThread):
                         f.write(line)
             self.log.info(f"网卡绑定配置成功，INTERFACESv4=\"{interface_name}\"")
         except Exception as e:
-            self.log.error(f'配置网卡绑定失败，错误信息：{e}')
+            # 新增：输出详细错误信息（包含错误号）
+            self.log.error(f'配置网卡绑定失败，错误信息：{e}（errno={e.errno}）')
             flag = False
 
         # 配置DHCP文件
         try:
             self.log.info('开始配置DHCP')
+            dhcpd_conf = '/etc/dhcp/dhcpd.conf'
+            print(f"[DEBUG] 尝试写入文件: {dhcpd_conf}")
+            if os.path.exists(dhcpd_conf):
+                print(f"[DEBUG] 文件权限: {oct(os.stat(dhcpd_conf).st_mode)}")
+
             net_ip = self.res_dict['NET_INTER_IP']
             network_segment = '.'.join(net_ip.split('.')[:3])
             net_boot = 'x86_64-efi/netbootx64.efi' if self.res_dict['ARCH'] == "X86" else 'arm64-efi/netbootaa64.efi'
@@ -171,8 +195,8 @@ class Installer(QThread):
         # 配置NFS
         try:
             self.log.info('开始配置NFS')
-            nfs_config = f"/opt/nfs *(ro,async,no_subtree_check)\n"
-            with open('/etc/exports', 'a') as f:
+            nfs_config = f"/opt/nfs *(rw,sync,no_root_squash,no_subtree_check)\n"
+            with open('/etc/exports', 'w') as f:
                 f.write(nfs_config)
             shellcmd('exportfs -a')
             self.log.info('配置NFS成功')
@@ -225,10 +249,15 @@ class Installer(QThread):
                 flag = False
             self.log.info('导入配置文件成功')
         else:
-            self.config.read('default.cfg', encoding='utf-8')
+            if os.path.exists(self.default_cfg_path):
+                print(shellcmd(f"ls {self.default_cfg_path}").stdout)
+                print(f'{self.default_cfg_path} 文件存在')
+            self.config.read(self.default_cfg_path, encoding='utf-8')
             # 设置installer.cfg文件
             # [Encrypty]
+            print('使用set')
             self.config.set('Encrypty','encrypty',str(self.res_dict['ENCRYPTY']).lower())
+            print('使用字典')
             self.config['Encrypty']['encryptypwd'] = f"@ByteArray({self.res_dict['ENCRYPTY_PWD']})"
             self.config['Encrypty']['lvm'] = str(self.res_dict['LVM']).lower()
             # [config]
@@ -258,7 +287,7 @@ class Installer(QThread):
             self.log.info('开始写入配置文件')
             installer_path = os.path.join('/opt/nfs/',self.iso_dir, 'ky-installer.cfg')
             with open(installer_path, 'w', encoding='utf-8') as file:
-                self.config.write(file)  # type: ignore
+                self.config.write(file,space_around_delimiters=False)  # type: ignore
                 self.log.info('写入配置文件成功')
         except Exception as e:
             self.log.error(f'写入配置文件失败,错误信息：{e}')
@@ -272,7 +301,7 @@ class Installer(QThread):
             if not os.path.exists('/srv/tftp'):
                 os.makedirs('/srv/tftp')
             # 解压启动文件
-            tar_file = shellcmd(f"tar zxvf {self.iso_dir}.tar.gz -C /srv/tftp/")
+            tar_file = shellcmd(f"tar zxvf {self.project_root}/{self.iso_dir}.tar.gz -C /srv/tftp/")
             if tar_file.returncode:
                 self.log.error(f'解压启动文件,错误信息：{tar_file.stderr}')
                 flag = False
@@ -292,7 +321,7 @@ class Installer(QThread):
             # 配置grub文件
             grub_file = (
                 f'menuentry "Install Kylin-Desktop-Auto" {{\n'
-                f"linux ${{root}}/casper/vmlinuz boot=casper locale=zh_CN quiet splash audit =0 ip=dhcp netboot=nfs nfsroot= {self.res_dict['NET_INTER_IP']}:/opt/nfs/{self.iso_dir}/ security= a utomatic-ubiquity"
+                f"linux ${{root}}/casper/vmlinuz boot=casper locale=zh_CN quiet splash audit =0 ip=dhcp netboot=nfs nfsroot={self.res_dict['NET_INTER_IP']}:/opt/nfs/{self.iso_dir}/ security= automatic-ubiquity\n"
                 f"initrd ${{root}}/casper/initrd.lz\n}}"
             )
             with open(f'/srv/tftp/{self.iso_dir}/boot/grub/grub.cfg', 'w') as f:
@@ -320,6 +349,7 @@ class Installer(QThread):
             self.log.error(f'重启服务失败,错误信息：{e}')
             flag = False
         return flag
+
     # 运行函数
     def run(self):
         try:
@@ -344,7 +374,104 @@ class Installer(QThread):
 
             self.log.info('所有配置完成')
         except Exception as e:
-            self.log.error(f'运行过程中出现异常,错误信息：{e}')
+            self.log.error(f'{method}运行过程中出现异常,错误信息：{e}')
+            print(str(e))
+
+    def stop(self):
+        self.running = False
+        self.wait()
+
+
+class Remove(QThread):
+    output_signal = pyqtSignal(tuple)
+    error_signal = pyqtSignal(str)
+    finished_signal = pyqtSignal(int)
+
+    def __init__(self):
+        super().__init__()
+        self.running = False
+        self.log = _Logger(self.output_signal)
+        self.packages = 'isc-dhcp-server nfs-kernel-server tftpd-hpa'
+
+    def remove_package(self):
+        flag = True
+        try:
+            self.log.info('开始卸载组件包')
+            remove_packages = shellcmd(f'apt remove -y {self.packages}')
+            if remove_packages.returncode:
+                self.log.error(f'卸载组件包失败，错误信息：{remove_packages.stderr}')
+                flag = False
+            else:
+                self.log.info('卸载组件包成功')
+        except Exception as e:
+            self.log.error(f'卸载组件包失败，错误信息：{e}')
+            flag = False
+        return flag
+
+    def del_file(self):
+        flag = True
+        try:
+            self.log.info('开始删除文件')
+            del_file_list = [
+                '/opt/nfs',
+                '/etc/default/isc-dhcp-server',
+                '/etc/dhcp/dhcpd.conf',
+                '/srv/tftp',
+                '/etc/exports'
+            ]
+            for f in del_file_list:
+                print(f"[DEBUG] 尝试删除文件: {f}")
+                if os.path.exists(f):
+                    print(f"[DEBUG] 文件存在，权限: {oct(os.stat(f).st_mode)}")  # 输出文件权限
+                del_file = shellcmd(f'rm -rf {f}')
+                if del_file.returncode:
+                    # 新增：输出命令执行的完整错误输出
+                    self.log.error(f'删除文件失败，错误信息：{del_file.stderr}（命令: rm -rf {f}）')
+                    flag = False
+                else:
+                    self.log.info('删除文件成功')
+            return flag
+        except Exception as e:
+            self.log.error(f'删除文件失败，错误信息：{e}')
+            flag = False
+            return flag
+
+    def umount(self):
+        flag = True
+        try:
+            self.log.info('开始卸载ISO镜像')
+            if shellcmd("mountpoint -q /mnt").returncode:
+                self.log.info("未挂载ISO镜像,跳过卸载")
+            else:
+                umount_iso = shellcmd('umount /mnt')
+                if umount_iso.returncode:
+                    self.log.error(f'卸载ISO镜像失败,错误信息：{umount_iso.stderr}')
+                    flag = False
+                else:
+                    self.log.info('卸载ISO镜像成功')
+            return flag
+        except Exception as e:
+            self.log.error(f'卸载ISO镜像失败,错误信息：{e}')
+            flag = False
+        return flag
+
+
+    def run(self):
+        try:
+            self.running = True
+            methods_to_run = [
+                self.remove_package,
+                self.del_file,
+                self.umount
+            ]
+            for method in methods_to_run:
+                status = method()
+                print(f'{method.__name__} => {status}')
+                if not status:
+                    return
+            self.log.info('所有卸载完成')
+        except Exception as e:
+            self.log.error(f'{method}运行过程中出现异常,错误信息：{e}')
             print(str(e))
 
     def stop(self):
